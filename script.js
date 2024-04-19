@@ -6,6 +6,8 @@ const websiteNameEl = document.getElementById("website-name");
 const websiteUrlEl = document.getElementById("website-url");
 const bookmarksContainer = document.getElementById("bookmarks-container");
 
+let bookmarks = [];
+
 // Show Modal, Focus on Input
 function showModal() {
   modal.classList.add("show-modal");
@@ -39,6 +41,26 @@ function validate(nameValue, urlValue) {
     return true;
   }
 
+// Fetch Bookmarks
+function fetchBookmarks() {
+    // Get bookmarks from localStorage if available also converting them from json string to js object using parse
+    if (localStorage.getItem('bookmarks')) {
+        bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
+    }
+    // At the very first time if someone visit, there would be no bookmarks, so a default bookmark is created.
+    else {
+        bookmarks = [
+            {
+                name: 'Jacinto Design',
+                url: 'https://jacinto.design',
+            },
+        ];
+        //saving default bookmarks into the local storage
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    }
+    console.log(bookmarks);
+}
+
 // Handle Data from Form
 function storeBookmark(e) {
   e.preventDefault();
@@ -49,12 +71,27 @@ function storeBookmark(e) {
   if (!urlValue.includes("https://") && !urlValue.includes("http://")) {
     urlValue = `https://${urlValue}`;
   }
-  console.log(nameValue, urlValue);
+//   console.log(nameValue, urlValue);
   if (!validate(nameValue, urlValue)){
     return false;
   }
+  //creating bookmark object and push it in an array
+  const bookmark = {
+    name: nameValue,
+    url: urlValue,
+  };
+  bookmarks.push(bookmark);
+//   console.log(JSON.stringify(bookmarks));
+  // we stored the objects as string in the local storage
+  localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+  fetchBookmarks();
+  bookmarkForm.reset();
+  websiteNameEl.focus();
   
 }
 
 // Event Listener
 bookmarkForm.addEventListener("submit", storeBookmark);
+
+// On Load, Fetch Bookmarks
+fetchBookmarks();
